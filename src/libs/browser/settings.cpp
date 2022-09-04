@@ -31,9 +31,14 @@
 #include <QWebEngineSettings>
 #include <QWebEngineScript>
 #include <QWebEngineScriptCollection>
+#include <QFile>
+#include <QTextStream>
+#include <QApplication>
+#include <QDebug>
 
 namespace {
 constexpr char DarkModeCssUrl[] = "qrc:///browser/assets/css/darkmode.css";
+constexpr char QDarkStyleQssUrl[] = ":/qdarkstyle/dark/darkstyle.qss";
 constexpr char HighlightOnNavigateCssUrl[] = "qrc:///browser/assets/css/highlight.css";
 }
 
@@ -74,6 +79,15 @@ void Settings::applySettings()
 
     if (m_appSettings->darkModeEnabled) {
         setCustomStyleSheet(QStringLiteral("_zeal_darkstylesheet"), DarkModeCssUrl);
+
+        QFile f(QDarkStyleQssUrl);
+        if (f.exists()) {
+            f.open(QFile::ReadOnly | QFile::Text);
+            QTextStream ts(&f);
+            qApp -> setStyleSheet(ts.readAll());
+        } else {
+            qWarning() << "Unable to find the QDarkStyle qss file";
+        }
     }
 
     if (m_appSettings->highlightOnNavigateEnabled) {
